@@ -16,3 +16,7 @@ creates a new mailbox in postfix and dovecot
 ######[delete-email-user.sh] (https://github.com/blastik/bash-scripts/blob/master/delete-email-user.sh)
 
 deletes a postfix/dovecot mailbox
+
+######[removeoldkernels.sh] (https://github.com/blastik/bash-scripts/blob/master/emoveoldkernels.sh)
+
+to be run from crontab. deletes old kernels automatically when security updates are active.
