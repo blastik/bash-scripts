@@ -1,7 +1,7 @@
 ﻿#!/bin/sh
 
-maquinas=maquinascampus.txt
-dirs=`cat dirscampus.txt`
+maquinas=servers.txt
+dirs=`cat directorios.txt`
 
 while read -r server; do
 echo "$server"
