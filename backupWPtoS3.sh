@@ -11,9 +11,11 @@ dbpass="dbpass"
 S3bucket="S3bucket"
 SNSarn="SNSarn"
 
+error_file="/tmp/backup.log"
+
 export IFS=";"
 for i in $sourcedirs; do
-  echo 'compressing '$sourcedir' to '$destdir'/'${i///}'-'$timestamp'.zip'
+  echo 'compressing  '$destdir'/'${i///}'-'$timestamp'.zip'
   cd $i
   zip -r $destdir/${i///}-$timestamp.zip *
 done
@@ -25,13 +27,15 @@ echo "appending sql database to varwww-$timestamp.zip"
 cd $destdir
 zip -um varwww-$timestamp.zip database.sql
 
-for i in $sourcedirs; do
-  echo 'uploading '${i///}'-'$timestamp'.zip to S3'
-  move2s3=$(aws s3 mv $destdir/${i///}-$timestamp.zip s3://$S3bucket 2>&1)
-done
+
+echo "appending opendkim.conf etcopendkim-$timestamp.zip"
+zip -u etcopendkim-$timestamp.zip /etc/opendkim.conf
+
+echo 'moving files to S3'
+/usr/local/bin/aws s3 mv $destdir/ s3://$S3bucket --recursive --exclude "*" --include "*.zip"
 
 if [ $? != 0 ]; then
-  aws sns publish --topic-arn $SNSarn --subject "AWS personal backup FAILED" --message "$move2s3"
+  /usr/local/bin/aws sns publish --topic-arn $SNSarn --subject "AWS personal backup FAILED" --message "FAIL"
 else
-  aws sns publish --topic-arn $SNSarn --subject "AWS personal backup DONE" --message "$move2s3"
+  /usr/local/bin/aws sns publish --topic-arn $SNSarn --subject "AWS personal backup DONE" --message "OK"
 fi
